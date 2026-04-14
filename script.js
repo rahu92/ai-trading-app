@@ -1,12 +1,29 @@
-const chart = LightweightCharts.createChart(document.getElementById("chart"), {
-  width: 800,
-  height: 400,
-});
+// =======================
+// 📊 CREATE CHART
+// =======================
+const chart = LightweightCharts.createChart(
+  document.getElementById("chart"),
+  {
+    width: window.innerWidth * 0.9,
+    height: 400,
+    layout: {
+      background: { color: "#0f172a" },
+      textColor: "#ffffff",
+    },
+    grid: {
+      vertLines: { color: "#334155" },
+      horzLines: { color: "#334155" },
+    },
+  }
+);
 
-const candleSeries = chart.addCandlestickSeries();
+// FIXED NEW API
+const candleSeries = chart.addSeries(
+  LightweightCharts.CandlestickSeries
+);
 
 // =======================
-// 📡 FETCH LIVE DATA
+// 📡 LOAD LIVE DATA (BTC)
 // =======================
 async function loadChart() {
   const res = await fetch(
@@ -37,10 +54,8 @@ async function getStrategy() {
   const data = await res.json();
 
   document.getElementById("output").innerHTML =
-    `<h3>Strategy</h3>
-     <p>${data.name}</p>`;
+    `<h3>Strategy</h3><p>${data.name}</p>`;
 }
-
 
 // =======================
 // 📊 BACKTEST
@@ -54,7 +69,6 @@ async function runBacktest() {
      <p>Balance: ${data.balance}</p>
      <p>Accuracy: ${data.accuracy}</p>`;
 }
-
 
 // =======================
 // 🤖 AI SIGNAL
