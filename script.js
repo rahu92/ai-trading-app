@@ -199,3 +199,28 @@ function runStrategy() {
     `<b>Signal:</b> ${signal}<br>
      Buy Score: ${buyScore} | Sell Score: ${sellScore}`;
 }
+// 📍 ADD MARKER ON CHART
+const lastCandle = window.chartData[window.chartData.length - 1];
+
+if (signal === "BUY") {
+  markers.push({
+    time: lastCandle.time,
+    position: "belowBar",
+    color: "green",
+    shape: "arrowUp",
+    text: "BUY"
+  });
+}
+
+if (signal === "SELL") {
+  markers.push({
+    time: lastCandle.time,
+    position: "aboveBar",
+    color: "red",
+    shape: "arrowDown",
+    text: "SELL"
+  });
+}
+
+// Apply markers
+candleSeries.setMarkers(markers);
