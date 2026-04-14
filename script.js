@@ -109,3 +109,92 @@ async function getAI() {
     `<b>Signal:</b> ${data.signal} <br>
      <b>Confidence:</b> ${data.confidence}`;
 }
+// RSI
+function calculateRSI(data, period = 14) {
+  let gains = 0, losses = 0;
+  for (let i = data.length - period; i < data.length; i++) {
+    let diff = data[i].close - data[i - 1].close;
+    if (diff > 0) gains += diff;
+    else losses -= diff;
+  }
+  let rs = gains / losses;
+  return 100 - (100 / (1 + rs));
+}
+
+// EMA
+function calculateEMA(data, period) {
+  let k = 2 / (period + 1);
+  let ema = data[0].close;
+  for (let i = 1; i < data.length; i++) {
+    ema = data[i].close * k + ema * (1 - k);
+  }
+  return ema;
+}
+
+// MACD
+function calculateMACD(data) {
+  let ema12 = calculateEMA(data.slice(-50), 12);
+  let ema26 = calculateEMA(data.slice(-50), 26);
+  return ema12 - ema26;
+}
+
+// Bollinger
+function calculateBB(data) {
+  let closes = data.slice(-20).map(d => d.close);
+  let avg = closes.reduce((a, b) => a + b, 0) / closes.length;
+
+  let variance = closes.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / closes.length;
+  let std = Math.sqrt(variance);
+
+  return {
+    upper: avg + 2 * std,
+    lower: avg - 2 * std,
+    price: closes[closes.length - 1]
+  };
+}
+function runStrategy() {
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+
+  if (!window.chartData) return alert("Chart not loaded");
+
+  let buyScore = 0;
+  let sellScore = 0;
+
+  checkboxes.forEach(cb => {
+    if (cb.value === "rsi") {
+      let rsi = calculateRSI(window.chartData);
+      if (rsi < 30) buyScore++;
+      if (rsi > 70) sellScore++;
+    }
+
+    if (cb.value === "ema") {
+      let ema20 = calculateEMA(window.chartData.slice(-50), 20);
+      let ema50 = calculateEMA(window.chartData.slice(-50), 50);
+
+      if (ema20 > ema50) buyScore++;
+      if (ema20 < ema50) sellScore++;
+    }
+
+    if (cb.value === "macd") {
+      let macd = calculateMACD(window.chartData);
+      if (macd > 0) buyScore++;
+      if (macd < 0) sellScore++;
+    }
+
+    if (cb.value === "bb") {
+      let bb = calculateBB(window.chartData);
+
+      if (bb.price < bb.lower) buyScore++;
+      if (bb.price > bb.upper) sellScore++;
+    }
+  });
+
+  let signal = "HOLD";
+
+  if (buyScore > sellScore) signal = "BUY";
+  else if (sellScore > buyScore) signal = "SELL";
+
+  document.getElementById("output").innerHTML =
+    `<b>Signal:</b> ${signal}<br>
+     Buy Score: ${buyScore} | Sell Score: ${sellScore}`;
+}
