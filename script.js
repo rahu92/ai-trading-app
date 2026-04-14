@@ -1,6 +1,7 @@
 // =======================
 // 📊 CREATE CHART
 // =======================
+let markers = [];
 const chart = LightweightCharts.createChart(
   document.getElementById("chart"),
   {
