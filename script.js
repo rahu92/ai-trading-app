@@ -1,70 +1,70 @@
-const express = require("express");
-const app = express();
-
-// Middleware
-app.use(express.static(__dirname));
-app.use(express.json());
-
-
-// ======================
-// 🚀 Strategy Generator
-// ======================
-app.get("/strategy", (req, res) => {
-  const strategies = [
-    {
-      name: "RSI Strategy",
-      entry: "RSI < 30",
-      exit: "RSI > 70"
-    },
-    {
-      name: "EMA Crossover",
-      entry: "EMA20 > EMA50",
-      exit: "EMA20 < EMA50"
-    }
-  ];
-
-  const randomStrategy =
-    strategies[Math.floor(Math.random() * strategies.length)];
-
-  res.json(randomStrategy);
+const chart = LightweightCharts.createChart(document.getElementById("chart"), {
+  width: 800,
+  height: 400,
 });
 
+const candleSeries = chart.addCandlestickSeries();
 
-// ======================
-// 📊 Backtest
-// ======================
-app.get("/backtest", (req, res) => {
-  let balance = 1000;
+// =======================
+// 📡 FETCH LIVE DATA
+// =======================
+async function loadChart() {
+  const res = await fetch(
+    "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=100"
+  );
 
-  for (let i = 0; i < 10; i++) {
-    balance += Math.random() * 100 - 50;
-  }
+  const data = await res.json();
 
-  res.json({
-    balance: balance.toFixed(2),
-    accuracy: (Math.random() * 100).toFixed(2) + "%"
-  });
-});
+  const candles = data.map((c) => ({
+    time: c[0] / 1000,
+    open: parseFloat(c[1]),
+    high: parseFloat(c[2]),
+    low: parseFloat(c[3]),
+    close: parseFloat(c[4]),
+  }));
 
+  candleSeries.setData(candles);
+}
 
-// ======================
-// 🤖 AI Signal
-// ======================
-app.get("/ai", (req, res) => {
-  const signals = ["BUY", "SELL", "HOLD"];
-
-  res.json({
-    signal: signals[Math.floor(Math.random() * signals.length)],
-    confidence: (Math.random() * 100).toFixed(2) + "%"
-  });
-});
+loadChart();
 
 
-// ======================
-// 🌐 Start Server (IMPORTANT)
-// ======================
-const PORT = process.env.PORT || 3000;
+// =======================
+// 🚀 STRATEGY
+// =======================
+async function getStrategy() {
+  const res = await fetch("/strategy");
+  const data = await res.json();
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} 🚀`);
-});
+  document.getElementById("output").innerHTML =
+    `<h3>Strategy</h3>
+     <p>${data.name}</p>`;
+}
+
+
+// =======================
+// 📊 BACKTEST
+// =======================
+async function runBacktest() {
+  const res = await fetch("/backtest");
+  const data = await res.json();
+
+  document.getElementById("output").innerHTML =
+    `<h3>Backtest</h3>
+     <p>Balance: ${data.balance}</p>
+     <p>Accuracy: ${data.accuracy}</p>`;
+}
+
+
+// =======================
+// 🤖 AI SIGNAL
+// =======================
+async function getAI() {
+  const res = await fetch("/ai");
+  const data = await res.json();
+
+  document.getElementById("output").innerHTML =
+    `<h3>AI Signal</h3>
+     <p>${data.signal}</p>
+     <p>${data.confidence}</p>`;
+}
