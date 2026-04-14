@@ -4,7 +4,7 @@
 const chart = LightweightCharts.createChart(
   document.getElementById("chart"),
   {
-    width: window.innerWidth * 0.9,
+    width: window.innerWidth * 0.95,
     height: 400,
     layout: {
       background: { color: "#0f172a" },
@@ -17,14 +17,15 @@ const chart = LightweightCharts.createChart(
   }
 );
 
-// FIXED NEW API
 const candleSeries = chart.addSeries(
   LightweightCharts.CandlestickSeries
 );
 
 // =======================
-// 📡 LOAD LIVE DATA (BTC)
+// 📡 LOAD INITIAL DATA
 // =======================
+let lastTime = 0;
+
 async function loadChart() {
   const res = await fetch(
     "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=100"
@@ -34,17 +35,45 @@ async function loadChart() {
 
   const candles = data.map((c) => ({
     time: c[0] / 1000,
-    open: parseFloat(c[1]),
-    high: parseFloat(c[2]),
-    low: parseFloat(c[3]),
-    close: parseFloat(c[4]),
+    open: +c[1],
+    high: +c[2],
+    low: +c[3],
+    close: +c[4],
   }));
+
+  lastTime = candles[candles.length - 1].time;
 
   candleSeries.setData(candles);
 }
 
 loadChart();
 
+// =======================
+// 🔴 LIVE UPDATE (SMART)
+// =======================
+setInterval(async () => {
+  const res = await fetch(
+    "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1"
+  );
+
+  const data = await res.json();
+  const c = data[0];
+
+  const newCandle = {
+    time: c[0] / 1000,
+    open: +c[1],
+    high: +c[2],
+    low: +c[3],
+    close: +c[4],
+  };
+
+  // Only update if new data
+  if (newCandle.time >= lastTime) {
+    candleSeries.update(newCandle);
+    lastTime = newCandle.time;
+  }
+
+}, 2000);
 
 // =======================
 // 🚀 STRATEGY
@@ -54,7 +83,7 @@ async function getStrategy() {
   const data = await res.json();
 
   document.getElementById("output").innerHTML =
-    `<h3>Strategy</h3><p>${data.name}</p>`;
+    `<b>Strategy:</b> ${data.name}`;
 }
 
 // =======================
@@ -65,9 +94,8 @@ async function runBacktest() {
   const data = await res.json();
 
   document.getElementById("output").innerHTML =
-    `<h3>Backtest</h3>
-     <p>Balance: ${data.balance}</p>
-     <p>Accuracy: ${data.accuracy}</p>`;
+    `<b>Balance:</b> ${data.balance} <br>
+     <b>Accuracy:</b> ${data.accuracy}`;
 }
 
 // =======================
@@ -78,7 +106,6 @@ async function getAI() {
   const data = await res.json();
 
   document.getElementById("output").innerHTML =
-    `<h3>AI Signal</h3>
-     <p>${data.signal}</p>
-     <p>${data.confidence}</p>`;
+    `<b>Signal:</b> ${data.signal} <br>
+     <b>Confidence:</b> ${data.confidence}`;
 }
