@@ -57,7 +57,18 @@
   <button onclick="runBacktest()">Backtest</button>
   <button onclick="getAI()">AI Signal</button>
 </div>
+<div style="margin-top:20px;">
+  <h3>Strategy Builder</h3>
 
+  <label><input type="checkbox" value="rsi"> RSI</label>
+  <label><input type="checkbox" value="ema"> EMA</label>
+  <label><input type="checkbox" value="macd"> MACD</label>
+  <label><input type="checkbox" value="bb"> Bollinger</label>
+
+  <br><br>
+
+  <button onclick="runStrategy()">Generate Signal</button>
+</div>
 <div id="output"></div>
 
 <script src="script.js"></script>
