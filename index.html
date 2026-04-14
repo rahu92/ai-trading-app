@@ -2,18 +2,50 @@
 <html>
 <head>
   <title>AI Trading System</title>
+
+  <!-- Chart Library -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
   <style>
-    body { font-family: Arial; text-align: center; padding: 40px; }
-    button { margin: 10px; padding: 10px 20px; }
-    #output { margin-top: 20px; }
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    #chart {
+      width: 90%;
+      height: 400px;
+      margin: 20px auto;
+    }
+
+    #output {
+      margin-top: 20px;
+    }
   </style>
 </head>
+
 <body>
 
 <h1>🚀 AI Trading System</h1>
 
-<button onclick="getStrategy()">Generate Strategy</button>
-<button onclick="runBacktest()">Run Backtest</button>
+<div id="chart"></div>
+
+<button onclick="getStrategy()">Strategy</button>
+<button onclick="runBacktest()">Backtest</button>
 <button onclick="getAI()">AI Signal</button>
 
 <div id="output"></div>
